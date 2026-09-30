@@ -18,8 +18,9 @@ class PrestaShopDashboard(BasePlugin):
         
         ps_url = settings.get("ps_url", "").rstrip("/")
         ps_key = settings.get("ps_key", "")
+        ps_exclude_b2b = settings.get("ps_exclude_b2b") == 'on' or settings.get("ps_exclude_b2b") is True
         
-        data = self.fetch_data(ps_url, ps_key)
+        data = self.fetch_data(ps_url, ps_key, ps_exclude_b2b)
         
         image = Image.new("RGBA", dimensions, (255, 255, 255, 255))
         draw = ImageDraw.Draw(image)
@@ -66,7 +67,7 @@ class PrestaShopDashboard(BasePlugin):
 
         return image
 
-    def fetch_data(self, ps_url, ps_key):
+    def fetch_data(self, ps_url, ps_key, ps_exclude_b2b=True):
         if not ps_url or not ps_key:
             return {"error": "Paramètres API PrestaShop manquants."}
             
@@ -88,21 +89,39 @@ class PrestaShopDashboard(BasePlugin):
                 return response.json()
 
             # 1. Commandes à expédier (état 2 ou 3)
-            # PrestaShop ne gère pas toujours bien le OR ([2|3]) dans l'API, on va requêter les 2 statuts séparément pour être sûr.
             orders_ship_2 = get_api("orders", {"display": "[id]", "filter[current_state]": "[2]"}).get("orders", [])
             orders_ship_3 = get_api("orders", {"display": "[id]", "filter[current_state]": "[3]"}).get("orders", [])
             orders_to_ship = len(orders_ship_2) + len(orders_ship_3)
 
             # 2 & 3. CA et Panier moyen du jour
             today_orders_res = get_api("orders", {
-                "display": "[total_paid_tax_incl]", 
+                "display": "[total_paid_tax_incl,id_address_invoice]", 
                 "filter[valid]": "[1]",
                 "filter[date_add]": f"[{today_start},{now_str}]",
                 "date": "1"
             }).get("orders", [])
             
             revenue_today = sum(float(o["total_paid_tax_incl"]) for o in today_orders_res)
-            average_cart = (revenue_today / len(today_orders_res)) if today_orders_res else 0
+            
+            # Filtre des commandes d'Entreprises pour le panier moyen
+            valid_cart_orders = today_orders_res
+            if ps_exclude_b2b and valid_cart_orders:
+                address_ids = list(set([o['id_address_invoice'] for o in valid_cart_orders if 'id_address_invoice' in o]))
+                if address_ids:
+                    # Requête groupée des adresses de facturation
+                    ids_str = "|".join(str(aid) for aid in address_ids)
+                    addresses_info = get_api("addresses", {
+                        "display": "[id,company]",
+                        "filter[id]": f"[{ids_str}]"
+                    }).get("addresses", [])
+                    
+                    # On repère les adresses qui ont un nom d'entreprise
+                    address_companies = {str(a['id']): str(a.get('company', '') or '').strip() for a in addresses_info}
+                    
+                    # On exclut de la moyenne toute commande dont l'adresse de facturation contient une entreprise
+                    valid_cart_orders = [o for o in valid_cart_orders if not address_companies.get(str(o.get('id_address_invoice')))]
+            
+            average_cart = (sum(float(o["total_paid_tax_incl"]) for o in valid_cart_orders) / len(valid_cart_orders)) if valid_cart_orders else 0
 
             # 4. Evolution CA (par rapport à hier même heure)
             yesterday_orders_res = get_api("orders", {

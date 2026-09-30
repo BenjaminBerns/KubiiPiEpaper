@@ -1,0 +1,17 @@
+<div class="form-group">
+    <label for="ps_url" class="form-label">URL de la boutique (ex: https://monsite.com) :</label>
+    <input type="url" name="ps_url" id="ps_url" class="form-control" placeholder="https://monsite.com" value="" required>
+</div>
+<div class="form-group">
+    <label for="ps_key" class="form-label">Clé API (Webservice Key) :</label>
+    <input type="password" name="ps_key" id="ps_key" class="form-control" value="" required>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (pluginSettings) {
+            document.getElementById('ps_url').value = pluginSettings.ps_url || '';
+            document.getElementById('ps_key').value = pluginSettings.ps_key || '';
+        }
+    });
+</script>

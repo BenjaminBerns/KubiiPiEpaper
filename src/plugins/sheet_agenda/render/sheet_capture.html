@@ -1,0 +1,33 @@
+{% extends "plugin.html" %}
+
+{% block content %}
+
+<style>
+{{ sheet_styles | safe }}
+</style>
+
+<div class="sheet-capture">
+    {% if plugin_settings.displayTitle == "true" %}
+    <div class="sheet-title">{{ title }}</div>
+    {% endif %}
+    <div class="sheet-viewport" id="viewport">
+        <div class="ritz" id="sheet">
+            {{ table | safe }}
+        </div>
+    </div>
+</div>
+
+<script>
+    // met la feuille à l'échelle pour qu'elle tienne entièrement à l'écran
+    document.addEventListener('DOMContentLoaded', function () {
+        const viewport = document.getElementById('viewport');
+        const sheet = document.getElementById('sheet');
+        const scale = Math.min(
+            viewport.clientWidth / sheet.scrollWidth,
+            viewport.clientHeight / sheet.scrollHeight
+        );
+        sheet.style.transform = `scale(${scale})`;
+    });
+</script>
+
+{% endblock %}

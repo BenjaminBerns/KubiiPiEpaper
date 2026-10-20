@@ -1,0 +1,56 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.sheet-capture {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sheet-title {
+  font-family: "Jost";
+  font-size: 1.4em;
+  font-weight: bold;
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+.sheet-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sheet-viewport .ritz {
+  display: inline-block;
+  transform-origin: top left;
+}
+
+/* reprend la grille de base de Google Sheets */
+.ritz .waffle {
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+}
+
+.ritz .waffle td {
+  border: 1px solid #c0c0c0;
+  padding: 2px 3px;
+}
+
+/* masque les numéros de ligne et la barre de figement */
+.ritz .waffle .row-header-shim {
+  display: none;
+}
+
+.ritz .waffle th.header-shim {
+  height: 0;
+  padding: 0;
+  border: none;
+}

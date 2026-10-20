@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.presence {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Jost", sans-serif;
+}
+
+.presence-title {
+  font-size: calc(1.4em * var(--font-scale));
+  font-weight: bold;
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+.presence-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.presence-table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: calc(16px * var(--font-scale));
+}
+
+.presence-table th,
+.presence-table td {
+  border-bottom: 1px solid #bbbbbb;
+  text-align: center;
+  vertical-align: middle;
+  padding: 1px 2px;
+  overflow: hidden;
+}
+
+.presence-table .day-start {
+  border-left: 2px solid #000000;
+}
+
+.presence-table th.day {
+  border-left: 2px solid #000000;
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.presence-table .day-date {
+  font-weight: normal;
+  font-size: 0.8em;
+}
+
+.presence-table th.slot {
+  font-size: 0.8em;
+  border-bottom: 2px solid #000000;
+}
+
+.presence-table .name-col {
+  width: 13%;
+  text-align: right;
+  font-weight: bold;
+  padding-right: 6px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* jour courant : en-tête inversé et colonne encadrée */
+.presence-table th.today {
+  background: #000000;
+  color: #ffffff;
+}
+
+.presence-table td.today {
+  background: #f0f0f0;
+}
+
+.chip {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.1em 0.35em;
+  border-radius: 0.8em;
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

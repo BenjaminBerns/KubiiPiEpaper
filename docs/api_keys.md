@@ -94,3 +94,22 @@ Required for the Image Album plugin for the Immich Provider
     ```
     IMMICH_KEY=your-key
     ```
+## Google Service Account
+
+Optional for the Agenda Sheets plugin, to read a Google Sheet that is not shared by link. Without it, the sheet must be shared as "Anyone with the link" (Viewer).
+
+- In the [Google Cloud console](https://console.cloud.google.com/), create a project
+- Under APIs & Services > Library, enable the **Google Sheets API**
+- Under IAM & Admin > Service Accounts, create a service account (no role needed)
+- Open the service account, go to Keys > Add key > Create new key > JSON and download the file
+- Share the Google Sheet with the service account email (`...@....iam.gserviceaccount.com`) as **Viewer**
+- Copy the JSON file to the Raspberry Pi, outside the project folder, and restrict its permissions:
+    ```bash
+    chmod 600 /home/pi/inkypi-google-key.json
+    ```
+- Store the path of the file in the .env file with the key `GOOGLE_SERVICE_ACCOUNT_FILE`
+    ```
+    GOOGLE_SERVICE_ACCOUNT_FILE=/home/pi/inkypi-google-key.json
+    ```
+
+With the service account, the plugin reads the tab given in the sheet link (gid).

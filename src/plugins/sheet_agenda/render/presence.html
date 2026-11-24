@@ -2,45 +2,41 @@
 
 {% block content %}
 
-<div class="presence" style="--font-scale: {{ font_scale or 1 }};">
-    {% if plugin_settings.displayTitle == "true" %}
-    <div class="presence-title">{{ title }}</div>
-    {% endif %}
-    <div class="presence-viewport" id="viewport">
+<div class="presence">
+    <div class="presence-title">{{ titre }}</div>
+    <div class="presence-viewport" id="cadre">
         <table class="presence-table" id="planning">
             <thead>
                 <tr>
-                    <th class="name-col" {% if has_slots %}rowspan="2"{% endif %}></th>
-                    {% for day in days %}
-                    <th class="day {% if day.today %}today{% endif %}" colspan="{{ day.slots | length }}">
-                        {{ day.name }} <span class="day-date">{{ day.date.strftime('%d/%m') }}</span>
+                    <th class="name-col" {% if demi %}rowspan="2"{% endif %}></th>
+                    {% for jour in jours %}
+                    <th class="day {% if jour.aujourdhui %}today{% endif %}" colspan="{{ jour.colonnes | length }}">
+                        {{ jour.nom }} <span class="day-date">{{ jour.date }}</span>
                     </th>
                     {% endfor %}
                 </tr>
-                {% if has_slots %}
+                {% if demi %}
                 <tr>
-                    {% for day in days %}
-                    {% for slot in day.slots %}
-                    <th class="slot {% if day.today %}today{% endif %} {% if loop.first %}day-start{% endif %}">{{ slot.label }}</th>
+                    {% for jour in jours %}
+                    {% for colonne in jour.colonnes %}
+                    <th class="slot {% if jour.aujourdhui %}today{% endif %} {% if loop.first %}day-start{% endif %}">{{ demi[colonne] }}</th>
                     {% endfor %}
                     {% endfor %}
                 </tr>
                 {% endif %}
             </thead>
             <tbody>
-                {% for person in people %}
+                {% for personne in personnes %}
                 <tr>
-                    <td class="name-col">{{ person.name }}</td>
-                    {% set index = namespace(value=0) %}
-                    {% for day in days %}
-                    {% for slot in day.slots %}
-                    {% set status = person.statuses[index.value] %}
-                    <td class="{% if day.today %}today{% endif %} {% if loop.first %}day-start{% endif %}">
-                        {% if status.text %}
-                        <span class="chip" style="background: {{ status.background }}; color: {{ status.color }};">{{ status.text }}</span>
+                    <td class="name-col">{{ personne.nom }}</td>
+                    {% for jour in jours %}
+                    {% for colonne in jour.colonnes %}
+                    {% set statut = personne.statuts[colonne] %}
+                    <td class="{% if jour.aujourdhui %}today{% endif %} {% if loop.first %}day-start{% endif %}">
+                        {% if statut.texte %}
+                        <span class="chip" style="background: {{ statut.fond }}; color: {{ statut.couleur }};">{{ statut.texte }}</span>
                         {% endif %}
                     </td>
-                    {% set index.value = index.value + 1 %}
                     {% endfor %}
                     {% endfor %}
                 </tr>
@@ -51,20 +47,20 @@
 </div>
 
 <script>
-    // part d'un grand texte et le réduit jusqu'à ce que le planning tienne dans l'écran
-    // et que les statuts ne soient plus tronqués
+    // on part d'un grand texte et on le réduit jusqu'à ce que le planning tienne dans l'écran
+    // et que les statuts ne soient plus coupés
     document.addEventListener('DOMContentLoaded', function () {
-        const viewport = document.getElementById('viewport');
-        const table = document.getElementById('planning');
-        const chips = Array.from(table.querySelectorAll('.chip'));
-        const overflows = () => table.offsetHeight > viewport.clientHeight || table.scrollWidth > viewport.clientWidth;
-        const truncated = () => chips.some(chip => chip.scrollWidth > chip.clientWidth);
+        const cadre = document.getElementById('cadre');
+        const planning = document.getElementById('planning');
+        const pastilles = Array.from(planning.querySelectorAll('.chip'));
+        const deborde = () => planning.offsetHeight > cadre.clientHeight || planning.scrollWidth > cadre.clientWidth;
+        const coupe = () => pastilles.some(pastille => pastille.scrollWidth > pastille.clientWidth);
 
-        let size = 2 * parseFloat(getComputedStyle(table).fontSize);
-        table.style.fontSize = size + 'px';
-        while (size > 6 && (overflows() || (size > 9 && truncated()))) {
-            size -= 0.5;
-            table.style.fontSize = size + 'px';
+        let taille = 32;
+        planning.style.fontSize = taille + 'px';
+        while (taille > 6 && (deborde() || (taille > 9 && coupe()))) {
+            taille -= 0.5;
+            planning.style.fontSize = taille + 'px';
         }
     });
 </script>
